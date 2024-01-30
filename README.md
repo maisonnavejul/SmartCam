@@ -1,7 +1,7 @@
 # SmartCam
 ## Github
 cloner le repo :
-- `git clone [https://token@github.com/username/repo.git](https://github.com/maisonnavejul/SmartCam.git)`
+- `git clone https://github.com/maisonnavejul/SmartCam.git`
 
 recuperer le contenu de la branche :
 - `git pull`
