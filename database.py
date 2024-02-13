@@ -6,20 +6,21 @@ def create_database():
     try:
         conn = sqlite3.connect('database.db')
         cursor = conn.cursor()
-        cursor.execute("CREATE TABLE IF NOT EXISTS info_salle_1 ( id INTEGER PRIMARY KEY, nbpers TEXT DEFAULT '0', temperature TEXT DEFAULT '0', light TEXT DEFAULT 'OFF', date TEXT)")
+        cursor.execute("CREATE TABLE IF NOT EXISTS info_salle_1 ( id INTEGER PRIMARY KEY, nbpers TEXT DEFAULT '0', temperature TEXT DEFAULT '0', humidity TEXT DEFAULT '0', light TEXT DEFAULT 'OFF',chauffage TEXT DEFAULT 'OFF',chauffage_from_front TEXT DEFAULT 'NO', date TEXT)")
         conn.close()
         print("Database created successfully.")
     except Exception as e:
         print("Error creating database:", str(e))
         
-def insert_data():
+def insert_data(nbpers, temperature, humidity, light, chauffage, chauffage_from_front):
     try:
         conn = sqlite3.connect('database.db')
         cursor = conn.cursor()
         
         # Insertion d'une ligne de données
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        cursor.execute("INSERT INTO info_salle_1 (nbpers, temperature, light, date) VALUES (?, ?, ?, ?)", ('0', '22', 'OFF', now))
+        cursor.execute("INSERT INTO info_salle_1 (nbpers, temperature, humidity, light,chauffage, chauffage_from_front, date) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                       (nbpers, temperature, humidity, light, chauffage, chauffage_from_front, now))
         
         conn.commit()  
         conn.close()
