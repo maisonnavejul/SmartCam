@@ -7,10 +7,63 @@ class App extends Component {
     this.state = {
       textValue: '',
       errorMessage: '',
-      allData: [] // Initialisation d'un état pour stocker toutes les données
+      allData: [], // Initialisation d'un état pour stocker toutes les données
+      chauffageState: 'OFF', // Ajout d'un nouvel état pour le chauffage
+      chauffageState2: 'ON',
     };
+    
   }
+  toggleChauffage = async () => {
+    const newState = this.state.chauffageState === 'OFF' ? 'ON' :'ON';
+    this.setState({ chauffageState: newState });
+    await this.postChauffageState(newState);
+  };
+  postChauffageState = async (state) => {
+    try {
+      const response = await fetch('http://10.224.0.99:5000/sendchauffage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chauffage: state
+        }),
+      });
+      const data = await response.json();
+      console.log('Réponse du serveur:', data);
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi de l\'état du chauffage', error);
+      this.setState({ errorMessage: 'Erreur lors de l\'envoi de l\'état du chauffage.' });
+    }
+  };
+  toggleChauffage2 = async () => {
+    const newState = this.state.chauffageState2 === 'ON' ? 'OFF' :'OFF';
+    this.setState({ chauffageState2: newState });
+    await this.postChauffageState2(newState);
+  }
+  postChauffageState2 = async (state) => {
+    try {
+      const response = await fetch('http://10.224.0.99:5000/sendchauffage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chauffage: state
+        }),
+      });
+      const data = await response.json();
+      console.log('Réponse du serveur:', data);
+    }
+    catch (error) {
+      console.error('Erreur lors de l\'envoi de l\'état du chauffage', error);
+      this.setState({ errorMessage: 'Erreur lors de l\'envoi de l\'état du chauffage.' });
+    }
+  };
 
+  
+
+  
   componentDidMount() {
     this.getAllData(); // Appeler getAllData lorsque le composant est monté
   }
@@ -35,7 +88,7 @@ class App extends Component {
   postTemperature = async (temperature) => {
     console.log('temperature en envoi:', temperature);
     try {
-      const response = await fetch('http://192.168.1.52:5000/sendtemperature', {
+      const response = await fetch('http://10.224.0.99:5000/sendtemperature', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -56,7 +109,7 @@ class App extends Component {
   getAllData = async () => {
     console.log('Récupération de toutes les données');
     try {
-      const response = await fetch('http://192.168.1.52:5000/getdata', {
+      const response = await fetch('http://10.224.0.99:5000/getdata', {
         method: 'GET',
       });
       const data = await response.json();
@@ -86,6 +139,9 @@ class App extends Component {
           <button onClick={this.handleSubmit}>Envoyer</button>
           {this.state.errorMessage && <p style={{color: 'red'}}>{this.state.errorMessage}</p>}
         </div>
+        <button onClick={this.toggleChauffage}>Start Chauffage</button>
+        <button onClick={this.toggleChauffage2}>Stop Chauffage</button>
+
 
         <div className='AllData'>
         <h2>All Data</h2>
@@ -93,7 +149,7 @@ class App extends Component {
           
           <div className='rectangle'>
           <div key={index}>
-            <p>ID: {item[0]} - people: {item[1]} - Temperature: {item[2]} - Light: {item[3]} - Date: {item[4]}</p>
+            <p>ID: {item[0]} - people: {item[1]} - Temperature: {item[2]} -Humidity: {item[3]} Light: {item[4]} -Chauffage: {item[5]}- ActivationCM:{item[6]} -Date: {item[7]}</p>
           </div>
           </div>
         ))}
