@@ -9,6 +9,25 @@ from database import *
 
 
 app = Flask(__name__)
+mqtt_broker = "test.mosquitto.org"
+mqtt_port = 1883
+mqtt_client = mqtt.Client()
+
+bouton_active = False
+
+def on_connect(client, userdata, flags, rc):
+    print("Connexion au broker MQTT établie avec le code de retour : " + str(rc))
+    client.subscribe("test/topic")
+    print("Souscription au topic 'iot/data'")
+    
+def on_message(client, userdata, msg):
+    print(f"Message reçu : {msg.topic} {msg.payload.decode()}")
+    
+mqtt_client.on_connect = on_connect
+mqtt_client.on_message = on_message
+
+mqtt_client.connect(mqtt_broker, mqtt_port, 60)
+mqtt_client.loop_start()
 
 
 CORS(app)
@@ -60,4 +79,5 @@ def allData():
 
 if __name__ == '__main__':
     app.run(host='10.224.0.99', port=5000)
-
+while True:
+    pass
