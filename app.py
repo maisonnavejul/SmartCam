@@ -19,6 +19,8 @@ humidity = None
 light = "OFF"
 chauffage = "OFF"
 chauffage_from_front = "NO"
+want_temperature = None
+insert_data_temperature(want_temperature)
 
 bouton_active = False
 
@@ -75,6 +77,19 @@ def algo(nbpers, temperature, humidity):
     
     chauffage_from_front = last_data_chauffage_from_front()
     
+    want_temperature_data = last_data_temperature()
+    if want_temperature_data is not None:
+        try:
+            want_temperature = float(want_temperature_data)  
+        except ValueError:
+            print("Erreur: la température souhaitée n'est pas un nombre valide.")
+            return
+    else:
+        want_temperature = None
+    
+
+
+    
     print("Chauffage from front: ", chauffage_from_front)
     if chauffage_from_front == "NO":    
         if temperature <= 17:
@@ -86,6 +101,16 @@ def algo(nbpers, temperature, humidity):
         else:
             light = "OFF"
             
+        print('temperature voulue',want_temperature)
+        
+        if want_temperature is not None:
+            if want_temperature >= temperature:
+                chauffage = "ON"
+                print(want_temperature, '>=', temperature)
+            elif want_temperature <= temperature:
+                chauffage = "OFF"
+                print(want_temperature, '<=', temperature)
+
         insert_data(nbpers, temperature, humidity, light, chauffage)
         print("Nbper: ", nbpers , "Temperature: ", temperature, "Humidity: ", humidity, "Light: ", light, "Chauffage: ", chauffage, "Chauffage from front: ", chauffage_from_front)
     if chauffage_from_front == "YES":
@@ -108,8 +133,11 @@ def index():
 
 @app.route('/sendtemperature', methods=['POST'])
 def post_temperature():
+
     data = request.get_json()
     print(data)
+    want_temperature = data['temperature']
+    insert_data_temperature(want_temperature)
     return jsonify(data)
 
 @app.route('/test', methods=['GET'])

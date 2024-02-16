@@ -8,6 +8,7 @@ def create_database():
         cursor = conn.cursor()
         cursor.execute("CREATE TABLE IF NOT EXISTS info_salle_1 ( id INTEGER PRIMARY KEY, nbpers TEXT DEFAULT '0', temperature TEXT DEFAULT '0', humidity TEXT DEFAULT '0', light TEXT DEFAULT 'OFF',chauffage TEXT DEFAULT 'OFF', date TEXT)")
         cursor.execute("CREATE TABLE IF NOT EXISTS chauffage ( id INTEGER PRIMARY KEY, chauffage_from_front TEXT DEFAULT 'OFF', date TEXT)")
+        cursor.execute("CREATE TABLE IF NOT EXISTS temperature ( id INTEGER PRIMARY KEY, want_temperature TEXT DEFAULT 'NONE', date TEXT)")
         conn.close()
         print("Database created successfully.")
     except Exception as e:
@@ -71,6 +72,39 @@ def last_data_chauffage_from_front():
     except Exception as e:
         print("Error fetching data:", str(e))
         return None
+def insert_data_temperature(want_temperature):
+    try:
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
+        
+        # Insertion d'une ligne de données
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        cursor.execute("INSERT INTO temperature (want_temperature, date) VALUES (?, ?)",
+                       (want_temperature, now))
+        
+        conn.commit()  
+        conn.close()
+        print("Data inserted successfully.")
+    except Exception as e:
+        print("Error inserting data:", str(e))
+        
+def last_data_temperature():
+    try:
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
+        # Fetch the last row's 'want_temperature' column value
+        cursor.execute("SELECT want_temperature FROM temperature ORDER BY id DESC LIMIT 1")
+        row = cursor.fetchone()  # fetchone() retrieves a single row
+        conn.close()
+        if row:  # Check if a row was fetched
+            return row[0]  # Return the 'want_temperature' value
+        else:
+            return "No data"  # Return a message if no data was found
+    except Exception as e:
+        print("Error fetching data:", str(e))
+        return None
+
+        
 
 
 if __name__ == '__main__':
