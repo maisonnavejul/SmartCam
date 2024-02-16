@@ -32,26 +32,22 @@ def on_message(client, userdata, msg):
     try:
         message_data = json.loads(msg.payload.decode())
         
-        if message_data['type'] == 'message':
-            print(f"Message général reçu : {message_data['data']}")
+        if message_data['type'] == 'all_data':
+            data = message_data['data']
+            print(f"Message général reçu : {data['message']}")
+            print(f"Température mise à jour : {data['temperature']}")
+            print(f"Humidité mise à jour : {data['humidity']}")
+            print(f"Nombre de personnes mis à jour : {data['nbpers']}")
             
-        elif message_data['type'] == 'temperature':
-            temperature = float(message_data['data'])
-            print(f"Température mise à jour : {temperature}")
+            nbpers = data['nbpers']
+            temperature = data['temperature']
+            humidity = data['humidity']
             
-        elif message_data['type'] == 'humidity':
-            humidity = float(message_data['data'])
-            print(f"Humidité mise à jour : {humidity}")
-            
-        elif message_data['type'] == 'nbpers':
-            nbpers = int(message_data['data'])
-            print(f"Nombre de personnes mis à jour : {nbpers}")
-            
-        if None not in (nbpers, temperature, humidity):
-            algo(nbpers, temperature, humidity)
-            nbpers = None
-            temperature = None
-            humidity = None
+            if None not in (nbpers, temperature, humidity):
+                algo(nbpers, temperature, humidity)
+                nbpers = None
+                temperature = None
+                humidity = None
     
 
             
@@ -90,7 +86,7 @@ def algo(nbpers, temperature, humidity):
         else:
             light = "OFF"
             
-        #insert_data(nbpers, temperature, humidity, light, chauffage, chauffage_from_front)
+        insert_data(nbpers, temperature, humidity, light, chauffage)
         print("Nbper: ", nbpers , "Temperature: ", temperature, "Humidity: ", humidity, "Light: ", light, "Chauffage: ", chauffage, "Chauffage from front: ", chauffage_from_front)
     if chauffage_from_front == "YES":
         if temperature >= 24:
@@ -101,7 +97,7 @@ def algo(nbpers, temperature, humidity):
             light = "ON"
         else:
             light = "OFF"
-        #insert_data(nbpers, temperature, humidity, light, chauffage, chauffage_from_front)
+        insert_data(nbpers, temperature, humidity, light, chauffage)
         print("Nbper: ", nbpers , "Temperature: ", temperature, "Humidity: ", humidity, "Light: ", light, "Chauffage: ", chauffage, "Chauffage from front: ", chauffage_from_front)
             
     
@@ -118,6 +114,7 @@ def post_temperature():
 
 @app.route('/test', methods=['GET'])
 def test():
+    chauffage_from_front = last_data_chauffage_from_front()
     return jsonify({"chauffage_from_front": chauffage_from_front})
 
 
@@ -138,7 +135,7 @@ def post_chauffage():
 def insertdata():
     print("Inserting data...")
     print("Nbper: ", nbpers , "Temperature: ", temperature, "Humidity: ", humidity, "Light: ", light, "Chauffage: ", chauffage, "Chauffage from front: ", chauffage_from_front)
-    insert_data(nbpers, temperature, humidity, light, chauffage, chauffage_from_front)
+    insert_data(nbpers, temperature, humidity, light, chauffage)
     return 'Data inserted successfully.'
 
 @app.route('/getdata', methods=['GET'])
@@ -148,5 +145,5 @@ def allData():
 
 
 if __name__ == '__main__':
-    app.run(host='10.224.0.99', port=5000, debug=True)  # Activez le mode debug pour le développement
+    app.run(host='192.168.1.39', port=5000)  # Activez le mode debug pour le développement
 
