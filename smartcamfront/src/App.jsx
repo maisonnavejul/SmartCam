@@ -8,19 +8,19 @@ class App extends Component {
       textValue: '',
       errorMessage: '',
       allData: [], // Initialisation d'un état pour stocker toutes les données
-      chauffageState: 'OFF', // Ajout d'un nouvel état pour le chauffage
-      chauffageState2: 'ON',
+      chauffageState: 'NO', // Ajout d'un nouvel état pour le chauffage
+      chauffageState2: 'YES',
     };
     
   }
   toggleChauffage = async () => {
-    const newState = this.state.chauffageState === 'OFF' ? 'ON' :'ON';
+    const newState = this.state.chauffageState === 'NO' ? 'YES' :'YES';
     this.setState({ chauffageState: newState });
     await this.postChauffageState(newState);
   };
   postChauffageState = async (state) => {
     try {
-      const response = await fetch('http://10.224.0.99:5000/sendchauffage', {
+      const response = await fetch('http://192.168.1.39:5000/sendchauffage', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37,13 +37,13 @@ class App extends Component {
     }
   };
   toggleChauffage2 = async () => {
-    const newState = this.state.chauffageState2 === 'ON' ? 'OFF' :'OFF';
+    const newState = this.state.chauffageState2 === 'YES' ? 'NO' :'NO';
     this.setState({ chauffageState2: newState });
     await this.postChauffageState2(newState);
   }
   postChauffageState2 = async (state) => {
     try {
-      const response = await fetch('http://10.224.0.99:5000/sendchauffage', {
+      const response = await fetch('http://192.168.1.39:5000/sendchauffage', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ class App extends Component {
   postTemperature = async (temperature) => {
     console.log('temperature en envoi:', temperature);
     try {
-      const response = await fetch('http://10.224.0.99:5000/sendtemperature', {
+      const response = await fetch('http://192.168.1.39:5000/sendtemperature', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ class App extends Component {
   getAllData = async () => {
     console.log('Récupération de toutes les données');
     try {
-      const response = await fetch('http://10.224.0.99:5000/getdata', {
+      const response = await fetch('http://192.168.1.39:5000/getdata', {
         method: 'GET',
       });
       const data = await response.json();
@@ -149,7 +149,7 @@ class App extends Component {
           
           <div className='rectangle'>
           <div key={index}>
-            <p>ID: {item[0]} - people: {item[1]} - Temperature: {item[2]} -Humidity: {item[3]} Light: {item[4]} -Chauffage: {item[5]}- ActivationCM:{item[6]} -Date: {item[7]}</p>
+            <p>ID: {item[0]} - people: {item[1]} - Temperature: {item[2]} -Humidity: {item[3]} Light: {item[4]} -Chauffage: {item[5]} -Date: {item[6]}</p>
           </div>
           </div>
         ))}
