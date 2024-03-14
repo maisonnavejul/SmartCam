@@ -173,5 +173,5 @@ def allData():
 
 
 if __name__ == '__main__':
-    app.run(host='192.168.1.39', port=5000)  # Activez le mode debug pour le développement
+    app.run(host='10.224.0.83', port=5000)  
 
