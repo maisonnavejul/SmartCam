@@ -80,7 +80,7 @@ def on_message_smartcam(client, userdata, msg):
             
             # Exécute la logique d'application basée sur les données mises à jour
             # Par exemple, mise à jour de la base de données ou ajustement des contrôles de l'environnement
-            #algo(nbpers, temperature, humidity)
+            algo(nbpers, temperature, humidity)
             
     except json.JSONDecodeError:
         print("Le message reçu n'est pas un JSON valide.")
@@ -120,7 +120,15 @@ timeout_thread.start()
 
 CORS(app)
 
+def publish_led_state(state):
+    """
+    Publie l'état de la LED ('ON' ou 'OFF') au topic MQTT "smartcam/led".
+    """
+    mqtt_client_smartcam.publish("smartcam/led", state)
+    print(f"État de la LED publié : {state}")
+
 def algo(nbpers, temperature, humidity):
+    global light
     
     chauffage_from_front = last_data_chauffage_from_front()
     
@@ -145,8 +153,10 @@ def algo(nbpers, temperature, humidity):
             chauffage = "OFF"
         if nbpers > 0 :
             light = "ON"
+            publish_led_state("ON")
         else:
             light = "OFF"
+            publish_led_state("OFF")
             
         print('temperature voulue',want_temperature)
         
@@ -167,8 +177,10 @@ def algo(nbpers, temperature, humidity):
             chauffage = "ON"
         if nbpers > 0 :
             light = "ON"
+            publish_led_state("ON")
         else:
             light = "OFF"
+            publish_led_state("OFF")
         insert_data(nbpers, temperature, humidity, light, chauffage)
         print("Nbper: ", nbpers , "Temperature: ", temperature, "Humidity: ", humidity, "Light: ", light, "Chauffage: ", chauffage, "Chauffage from front: ", chauffage_from_front)
             
