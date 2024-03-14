@@ -6,14 +6,25 @@ import os
 import requests
 from flask_cors import CORS
 from database import *
-
+import threading
+import time
 
 app = Flask(__name__)
-mqtt_broker = "test.mosquitto.org"
-mqtt_port = 1883
-mqtt_client = mqtt.Client()
+CORS(app)
 
-nbpers = None
+# Configuration MQTT
+mqtt_broker_smartcam = "test.mosquitto.org"
+mqtt_broker_frigate = "10.222.9.191"
+mqtt_port = 1883
+mqtt_topic_smartcam = "smartcam/data"
+mqtt_topic_frigate = 'frigate/events'
+
+# Clients MQTT
+mqtt_client_smartcam = mqtt.Client()
+mqtt_client_frigate = mqtt.Client()
+
+
+nbpers = 0
 temperature = None
 humidity = None
 light = "OFF"
@@ -24,51 +35,87 @@ insert_data_temperature(want_temperature)
 
 bouton_active = False
 
-def on_connect(client, userdata, flags, rc):
-    print("Connexion au broker MQTT établie avec le code de retour : " + str(rc))
-    client.subscribe("smartcam/data")
-    print("Souscription au topic 'smartcam/data'")
-    
-def on_message(client, userdata, msg):
-    global nbpers, temperature, humidity 
+
+
+lock = threading.Lock()
+last_detection_time = None
+timeout_seconds = 10  # Nombre de secondes avant la réinitialisation de nbpers
+
+def check_for_timeout():
+    global nbpers, last_detection_time
+    while True:
+        with lock:
+            if last_detection_time and (datetime.datetime.now() - last_detection_time).total_seconds() > timeout_seconds:
+                nbpers = 0
+                last_detection_time = None
+                print(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - 0")
+        time.sleep(1)
+
+def on_connect_smartcam(client, userdata, flags, rc):
+    print("Connecté au broker SmartCam avec le code :", rc)
+    client.subscribe(mqtt_topic_smartcam)
+
+def on_connect_frigate(client, userdata, flags, rc):
+    print("Connecté au broker Frigate avec le code :", rc)
+    client.subscribe(mqtt_topic_frigate)
+
+def on_message_smartcam(client, userdata, msg):
+    global temperature, humidity, nbpers
     try:
+        # Analyse le message JSON reçu
         message_data = json.loads(msg.payload.decode())
         
+        # Vérifie si le message est du type attendu
         if message_data['type'] == 'all_data':
             data = message_data['data']
-            print(f"Message général reçu : {data['message']}")
-            print(f"Température mise à jour : {data['temperature']}")
-            print(f"Humidité mise à jour : {data['humidity']}")
-            print(f"Nombre de personnes mis à jour : {data['nbpers']}")
             
-            nbpers = data['nbpers']
+            # Mise à jour des variables globales avec les données reçues
             temperature = data['temperature']
             humidity = data['humidity']
             
-            if None not in (nbpers, temperature, humidity):
-                algo(nbpers, temperature, humidity)
-                nbpers = None
-                temperature = None
-                humidity = None
-    
-
+            print(f"Message général reçu : {data['message']}")
+            print(f"Température mise à jour : {temperature}")
+            print(f"Humidité mise à jour : {humidity}")
+            print(f"Nombre de personnes (dernière détection) : {nbpers}")
+            
+            # Exécute la logique d'application basée sur les données mises à jour
+            # Par exemple, mise à jour de la base de données ou ajustement des contrôles de l'environnement
+            #algo(nbpers, temperature, humidity)
             
     except json.JSONDecodeError:
         print("Le message reçu n'est pas un JSON valide.")
-    except ValueError as e:
-        print("Erreur lors de la conversion du message : ", e)
     except KeyError as e:
-        print("Clé manquante dans le message JSON : ", e)
-    except TypeError as e:
-        print("Erreur de type de données : ", e)
+        print(f"Clé manquante dans le message JSON : {e}")
+    except (ValueError, TypeError) as e:
+        print(f"Erreur lors de la conversion du message : {e}")
 
 
-    
-mqtt_client.on_connect = on_connect
-mqtt_client.on_message = on_message
+def on_message_frigate(client, userdata, msg):
+    global nbpers, last_detection_time
+    with lock:
+        nbpers = 1  # Une détection entraîne nbpers à 1
+        last_detection_time = datetime.datetime.now()
+        print(f"{last_detection_time.strftime('%Y-%m-%d %H:%M:%S')} - 1")
 
-mqtt_client.connect(mqtt_broker, mqtt_port, 60)
-mqtt_client.loop_start()
+# Configuration des callbacks MQTT
+mqtt_client_smartcam.on_connect = on_connect_smartcam
+mqtt_client_smartcam.on_message = on_message_smartcam
+
+mqtt_client_frigate.on_connect = on_connect_frigate
+mqtt_client_frigate.on_message = on_message_frigate
+
+# Connexion aux brokers MQTT
+mqtt_client_smartcam.connect(mqtt_broker_smartcam, mqtt_port, 60)
+mqtt_client_frigate.connect(mqtt_broker_frigate, mqtt_port, 60)
+
+# Démarrage des clients MQTT dans des threads séparés
+mqtt_client_smartcam.loop_start()
+mqtt_client_frigate.loop_start()
+
+# Démarrer le thread de vérification de timeout
+timeout_thread = threading.Thread(target=check_for_timeout)
+timeout_thread.daemon = True
+timeout_thread.start()
 
 
 CORS(app)
@@ -173,5 +220,5 @@ def allData():
 
 
 if __name__ == '__main__':
-    app.run(host='10.224.0.83', port=5000)  
+    app.run(host='10.222.9.191', port=5000)  
 
