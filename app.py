@@ -124,7 +124,7 @@ def publish_led_state(state):
     """
     Publie l'état de la LED ('ON' ou 'OFF') au topic MQTT "smartcam/led".
     """
-    mqtt_client_smartcam.publish("smartcam/led", state)
+    mqtt_client_smartcam.publish("smartcam/led/jul", state)
     print(f"État de la LED publié : {state}")
     
 def publish_chauffage_state(state):
@@ -246,6 +246,12 @@ def getifdetect():
     global nbpers
     return jsonify({"detection": nbpers})
 
+@app.route('/getiftemp', methods=['GET'])
+def getiftemp():
+    global temperature
+    rounded_temperature = round(temperature, 1)
+    return jsonify({"temperature": rounded_temperature})
+ 
 
 if __name__ == '__main__':
     app.run(host='172.20.10.5', port=5000)  
