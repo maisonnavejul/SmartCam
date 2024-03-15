@@ -68,17 +68,92 @@ button {
   width: 100%;
 }
 .rectangle {
-  width: 70%;
-  height: 100px;
   background-color: #ffffff;
-  margin: 10px 0;
-  color:#004488;
+  border-radius: 8px; /* Bords arrondis */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Ombre pour du relief */
+  padding: 15px; /* Espacement intérieur */
+  margin: 10px 0; /* Espacement entre les éléments */
   display: flex;
-  flex-direction: row;
-  align-items: center; 
-  justify-content: center; 
+  justify-content: space-between; /* Distribue l'espace entre les éléments */
+  width: 80%; /* Utilise la largeur du conteneur */
+  color: #333; /* Couleur de texte pour un meilleur contraste */
 }
 
 
 
+.infoBlocks {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin: 20px 0;
+  color: #000;
+}
+
+.temperatureBlock, .presenceBlock {
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  background-color: #ffffff;
+  width: 30%;
+  text-align: center;
+}
+
+.temperatureBlock h2, .presenceBlock h2 {
+  margin: 0 0 10px;
+}
+
+.temperatureBlock p, .presenceBlock p {
+  font-size: 24px;
+  margin: 0;
+}
+
+.resetButtonContainer {
+  margin-top: 20px;
+}
+
+.resetButtonContainer button {
+  background-color: #f44336; /* Rouge */
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.resetButtonContainer button:hover {
+  background-color: #d32f2f;
+}
+.buttonsContainer {
+  display: flex;
+  justify-content: center; /* Centre les boutons horizontalement */
+  gap: 20px; /* Ajoute un espace entre les boutons */
+
+}
+.buttonsContainer button {
+  background-color: rgb(214, 67, 38); /* Couleur de fond des boutons */
+  color: white; /* Couleur du texte des boutons */
+  border: none; /* Supprime la bordure par défaut */
+  border-radius: 10px; /* Bords arrondis */
+  padding: 20px 30px; /* Ajuste la taille des boutons */
+  cursor: pointer; /* Change le curseur en main quand on survole le bouton */
+  transition: background-color 0.3s; /* Animation douce pour le changement de couleur */
+  margin-top: 30px;
+}
+
+.buttonsContainer button:hover {
+  background-color: rgb(255, 0, 0); /* Couleur de fond des boutons au survol, légèrement plus foncée */
+}
+.buttonSend button {
+  background-color: rgb(98, 90, 90); /* Couleur de fond des boutons */
+  color: white; /* Couleur du texte des boutons */
+  border: none; /* Supprime la bordure par défaut */
+  border-radius: 10px; /* Bords arrondis */
+  padding: 20px 30px; /* Ajuste la taille des boutons */
+  cursor: pointer; /* Change le curseur en main quand on survole le bouton */
+  transition: background-color 0.3s; /* Animation douce pour le changement de couleur */
+  margin-top: 20px;
+}
+.buttonSend button:hover {
+  background-color: rgb(0, 0, 0); /* Couleur de fond des boutons au survol, légèrement plus foncée */
+}
 
