@@ -14,9 +14,9 @@ CORS(app)
 
 # Configuration MQTT
 mqtt_broker_smartcam = "test.mosquitto.org"
-mqtt_broker_frigate = "10.222.9.191"
+mqtt_broker_frigate = "172.20.10.5"
 mqtt_port = 1883
-mqtt_topic_smartcam = "smartcam/data"
+mqtt_topic_smartcam = "smartcam/data/jul"
 mqtt_topic_frigate = 'frigate/events'
 
 # Clients MQTT
@@ -126,7 +126,14 @@ def publish_led_state(state):
     """
     mqtt_client_smartcam.publish("smartcam/led", state)
     print(f"État de la LED publié : {state}")
-
+    
+def publish_chauffage_state(state):
+    """
+    Publie l'état de la LED ('ON' ou 'OFF') au topic MQTT "smartcam/led".
+    """
+    mqtt_client_smartcam.publish("smartcam/chauffe/jul", state)
+    print(f"État de la chauffe publié : {state}")
+    
 def algo(nbpers, temperature, humidity):
     global light
     
@@ -149,8 +156,10 @@ def algo(nbpers, temperature, humidity):
     if chauffage_from_front == "NO":    
         if temperature <= 17:
             chauffage = "ON"
+            publish_chauffage_state("ON")
         else:
             chauffage = "OFF"
+            publish_chauffage_state("OFF")
         if nbpers > 0 :
             light = "ON"
             publish_led_state("ON")
@@ -173,8 +182,10 @@ def algo(nbpers, temperature, humidity):
     if chauffage_from_front == "YES":
         if temperature >= 24:
             chauffage = "OFF"
+            publish_chauffage_state("OFF")
         else:
             chauffage = "ON"
+            publish_chauffage_state("ON")
         if nbpers > 0 :
             light = "ON"
             publish_led_state("ON")
@@ -230,7 +241,12 @@ def allData():
     data = all_data()
     return jsonify(data)
 
+@app.route('/getifdetect', methods=['GET'])
+def getifdetect():
+    global nbpers
+    return jsonify({"detection": nbpers})
+
 
 if __name__ == '__main__':
-    app.run(host='10.222.9.191', port=5000)  
+    app.run(host='172.20.10.5', port=5000)  
 
